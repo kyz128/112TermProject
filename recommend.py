@@ -16,6 +16,7 @@ low_memory= False)
 # Data Cleaning
 ###############################################################################
 # merge keywords, credits, and metadata for analysis
+# metadata id column has invalid values; they should be eliminated 
 invalid= []
 metadataLen= len(metadata['id'])
 for i in range(metadataLen):
@@ -24,11 +25,16 @@ for i in range(metadataLen):
             invalid.append(i)
             break
 metadata= metadata.drop(invalid)
+# convert ids into int
 keywords['id'] = keywords['id'].astype('int')
 credits['id'] = credits['id'].astype('int')
 metadata['id'] = metadata['id'].astype('int')
+# perform merging 
 allFeatures = metadata.merge(credits, on='id')
 allFeatures = allFeatures.merge(keywords, on='id')
-
+# look at top 3 actors, plot keywords, and genre for recommendation criteria
+measures = ['cast', 'crew', 'keywords', 'genres']
+for measure in measures:
+    allFeatures[measure] = allFeatures[measure].apply(literal_eval)
 
 
