@@ -13,7 +13,7 @@ metadata= pd.read_csv('./the-movies-dataset/movies_metadata.csv', sep= ',', \
 low_memory= False)
 
 ###############################################################################
-# Data Cleaning
+# Data Cleaning 
 ###############################################################################
 # merge keywords, credits, and metadata for analysis
 # metadata id column has invalid values; they should be eliminated 
@@ -36,5 +36,9 @@ allFeatures = allFeatures.merge(keywords, on='id')
 measures = ['cast', 'crew', 'keywords', 'genres']
 for measure in measures:
     allFeatures[measure] = allFeatures[measure].apply(literal_eval)
+
+################################################################################
+# Data Selection
+################################################################################
 
 
