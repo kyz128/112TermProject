@@ -1,5 +1,6 @@
 from sklearn.feature_extraction.text import TfidfVectorizer
 
+# source: https://machinelearningmastery.com/prepare-text-data-machine-learning-scikit-learn/
 text = ["The quick brown fox jumped over the lazy dog.",
     "The dog.",
     "The fox"]

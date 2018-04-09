@@ -33,7 +33,7 @@ metadata['id'] = metadata['id'].astype('int')
 allFeatures = metadata.merge(credits, on='id')
 allFeatures = allFeatures.merge(keywords, on='id')
 # look at top 3 actors, plot keywords, and genre for recommendation criteria
-measures = ['cast', 'crew', 'keywords', 'genres']
+measures = ['cast','keywords', 'genres']
 for measure in measures:
     allFeatures[measure] = allFeatures[measure].apply(literal_eval)
 
@@ -41,4 +41,15 @@ for measure in measures:
 # Data Selection
 ################################################################################
 
+#get top 3 of each of the features 
+def getTop3(feature):
+    if isinstance(feature, list):
+        lst = [i['name'] for i in feature]
+        if len(lst) > 3:
+            lst = lst[:3]
+        return lst
+    return []
 
+for measure in measures:
+    allFeatures[measure]= allFeatures[measure].apply(getTop3)
+    
