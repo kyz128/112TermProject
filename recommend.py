@@ -1,7 +1,6 @@
 # import the necessary modules
 import pandas as pd
 import numpy as np
-import copy 
 import string
 from ast import literal_eval
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -17,12 +16,19 @@ low_memory= False)
 # Data Cleaning
 ###############################################################################
 # merge keywords, credits, and metadata for analysis
-nMetadata= copy.deepcopy(metadata)
+invalid= []
 metadataLen= len(metadata['id'])
 for i in range(metadataLen):
     for j in metadata['id'][i]:
         if j not in string.digits:
-            nMetadata=nMetadata.drop(nMetadata.index[i])
+            invalid.append(i)
+            break
+metadata= metadata.drop(invalid)
+keywords['id'] = keywords['id'].astype('int')
+credits['id'] = credits['id'].astype('int')
+metadata['id'] = metadata['id'].astype('int')
+allFeatures = metadata.merge(credits, on='id')
+allFeatures = allFeatures.merge(keywords, on='id')
 
 
 
