@@ -3,7 +3,8 @@ import pandas as pd
 import numpy as np
 import string
 from ast import literal_eval
-from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
 
 # read the data files
 credits= pd.read_csv('./the-movies-dataset/credits.csv', sep= ',')
@@ -67,6 +68,14 @@ def searchString(movie):
     + ' '.join(movie['genres'])
 
 allFeatures['search'] = allFeatures.apply(searchString, axis='columns')
+###############################################################################
+# Machine Learning
+###############################################################################
+
+countVector= CountVectorizer()
+countData= countVector.fit_transform(allFeatures['search'])
+cosScore= cosine_similarity(countData, countData)
+
 
 
 
