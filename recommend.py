@@ -60,7 +60,14 @@ def lowerStripSpace(feature):
 
 for measure in measures:
     allFeatures[measure]= allFeatures[measure].apply(getTop3)
-    alFeatures[measure]= allFeatures[measure].apply(lowerStripSpace)
+    allFeatures[measure]= allFeatures[measure].apply(lowerStripSpace)
+
+def searchString(movie):
+    return ' '.join(movie['keywords']) + ' ' + ' '.join(movie['cast']) + ' ' \
+    + ' '.join(movie['genres'])
+
+allFeatures['search'] = allFeatures.apply(searchString, axis='columns')
+
 
 
     
