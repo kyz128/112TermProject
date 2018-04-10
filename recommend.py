@@ -41,7 +41,7 @@ for measure in measures:
 # Data Selection
 ################################################################################
 
-#get top 3 of each of the features 
+#get top 3 of each of the features, if unavailable, return empty list
 def getTop3(feature):
     if isinstance(feature, list):
         lst = [i['name'] for i in feature]
@@ -50,6 +50,17 @@ def getTop3(feature):
         return lst
     return []
 
+def lowerStripSpace(feature):
+    l=[]
+    # strip spaces and convert everything to lowercase
+    for i in feature:
+        i=i.replace(" ", "")
+        l.append(i.lower())
+    return l
+
 for measure in measures:
     allFeatures[measure]= allFeatures[measure].apply(getTop3)
+    alFeatures[measure]= allFeatures[measure].apply(lowerStripSpace)
+
+
     
