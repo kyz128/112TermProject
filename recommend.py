@@ -98,8 +98,11 @@ def showCos(title):
     return cosScore
 
 def similarTitle(word):
+    # return similarity scores between movie title input & titles in data
     countVector = CountVectorizer(stop_words='english')
+    # vocabulary from all titles
     c = countVector.fit(allFeatures['title'])
+    # matrix of scores 
     cosScore = cosine_similarity(c.transform([word]), c.transform(allFeatures['title']))
     return cosScore
 
@@ -107,8 +110,9 @@ def getSpellingSuggestion(word):
     simTitle= similarTitle(word)
     sim= list(enumerate(simTitle[0]))
     sim.sort(key= lambda x: x[1], reverse= True)
+    # get top 3 suggestions
     for j, val in sim[0:3]:
-                print(allFeatures['title'][j])
+        print(allFeatures['title'][j])
     
 
 def getTitleRecs():
@@ -128,8 +132,27 @@ def getTitleRecs():
         print('Movie not found. Did you mean this:')
         getSpellingSuggestion(title)
         getTitleRecs()
-            
 
+            
+# def getFavoriteRecs(favorites):
+#     searchAttr= list()
+#     if len(favorites) ==0:
+#         print("Nothing in favorites")
+#     else:
+#         for i in favorites:
+#             newTitle= normalizeTitle(i)
+#             inx= indices[newTitle]
+#             searchAttr+= allFeatures['search'][inx]
+#         s= set(searchAttr.split())
+#     countVector = CountVectorizer(stop_words='english')
+#     c = countVector.fit(allFeatures['search'])
+#     cosScore = cosine_similarity(c.transform(list(s), c.transform(allFeatures['search']))
+#     scoresLst= list(enumerate(scores[0]))
+#     scoresLst.sort(key= lambda x: x[1], reverse= True)
+#     for i, score in scoresLst[1:11]:
+#         print(allFeatures['title'][i])
+    
+            
 
 
 
