@@ -97,19 +97,38 @@ def showCos(title):
     cosScore = cosine_similarity(countData[i], countData)
     return cosScore
 
+def similarTitle(word):
+    countVector = CountVectorizer(stop_words='english')
+    c = countVector.fit(allFeatures['title'])
+    cosScore = cosine_similarity(c.transform([word]), c.transform(allFeatures['title']))
+    return cosScore
+
+def getSpellingSuggestion(word):
+    simTitle= similarTitle(word)
+    sim= list(enumerate(simTitle[0]))
+    sim.sort(key= lambda x: x[1], reverse= True)
+    for j, val in sim[0:3]:
+                print(allFeatures['title'][j])
+    
 
 def getTitleRecs():
-    title= str(input('Enter a movie title:'))
-    # normalize input
-    title= normalizeTitle(title)
-    scores= showCos(title)
-    # convert into tuples of movie id and score
-    scoresLst= list(enumerate(scores[0]))
-    # sort the tuples by the score
-    scoresLst.sort(key= lambda x: x[1], reverse= True)
-    # get top 10 movie recs
-    for i, score in scoresLst[1:11]:
-        print(allFeatures['title'][i])
+    try:
+        title= str(input('Enter a movie title: '))
+        # normalize input
+        normTitle= normalizeTitle(title)
+        scores= showCos(normTitle)
+        # convert into tuples of movie id and score
+        scoresLst= list(enumerate(scores[0]))
+        # sort the tuples by the score
+        scoresLst.sort(key= lambda x: x[1], reverse= True)
+        # get top 10 movie recs
+        for i, score in scoresLst[1:11]:
+            print(allFeatures['title'][i])
+    except:
+        print('Movie not found. Did you mean this:')
+        getSpellingSuggestion(title)
+        getTitleRecs()
+            
 
 
 
