@@ -9,9 +9,10 @@ from sklearn.metrics.pairwise import cosine_similarity
 # read the data files
 credits= pd.read_csv('./the-movies-dataset/credits.csv', sep= ',')
 keywords= pd.read_csv('./the-movies-dataset/keywords.csv', sep= ',')
-ratings= pd.read_csv('./the-movies-dataset/ratings.csv', sep= ',')
+# ratings= pd.read_csv('./the-movies-dataset/ratings.csv', sep= ',')
+fields= ['id', 'genres', 'title', 'vote_average', 'vote_count']
 metadata= pd.read_csv('./the-movies-dataset/movies_metadata.csv', sep= ',', \
-low_memory= False)
+low_memory= False, usecols= fields)
 
 ###############################################################################
 # Data Cleaning 
@@ -71,10 +72,27 @@ allFeatures['search'] = allFeatures.apply(searchString, axis='columns')
 ###############################################################################
 # Machine Learning
 ###############################################################################
+#convert titles into lower case and strip space 
+def normalizeTitle(title):
+    t= title.lower()
+    words= t.split(' ')
+    words= "".join(words)
+    return words
 
-countVector= CountVectorizer()
-countData= countVector.fit_transform(allFeatures['search'])
-cosScore= cosine_similarity(countData, countData)
+# create a reverse lookup table for movie id and normalized movie title
+allFeatures['title']= allFeatures['title'].apply(str)
+allFeatures['newTitle']= allFeatures['title'].apply(normalizeTitle)
+indices = pd.Series(allFeatures.index, index=allFeatures['newTitle'])
+
+# get cosine similarity scores for all movies given a movie title
+def showCos(title):
+    i= indices[title]
+    vocab= (allFeatures['search'][i]).split(" ")
+    countVector = CountVectorizer(stop_words='english', vocabulary= vocab)
+    countData = countVector.fit_transform(allFeatures['search'])
+    cosScore = cosine_similarity(countData[i], countData)
+    return cosScore
+
 
 
 
