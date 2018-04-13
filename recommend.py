@@ -69,9 +69,11 @@ def searchString(movie):
     + ' '.join(movie['genres'])
 
 allFeatures['search'] = allFeatures.apply(searchString, axis='columns')
+
 ###############################################################################
 # Machine Learning
 ###############################################################################
+
 #convert titles into lower case and strip space 
 def normalizeTitle(title):
     t= title.lower()
@@ -86,13 +88,28 @@ indices = pd.Series(allFeatures.index, index=allFeatures['newTitle'])
 
 # get cosine similarity scores for all movies given a movie title
 def showCos(title):
+    # find the index of the movie title input 
     i= indices[title]
+    # get corresponding search string
     vocab= (allFeatures['search'][i]).split(" ")
     countVector = CountVectorizer(stop_words='english', vocabulary= vocab)
     countData = countVector.fit_transform(allFeatures['search'])
     cosScore = cosine_similarity(countData[i], countData)
     return cosScore
 
+
+def getTitleRecs():
+    title= str(input('Enter a movie title:'))
+    # normalize input
+    title= normalizeTitle(title)
+    scores= showCos(title)
+    # convert into tuples of movie id and score
+    scoresLst= list(enumerate(scores[0]))
+    # sort the tuples by the score
+    scoresLst.sort(key= lambda x: x[1], reverse= True)
+    # get top 10 movie recs
+    for i, score in scoresLst[1:11]:
+        print(allFeatures['title'][i])
 
 
 
