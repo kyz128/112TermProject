@@ -120,6 +120,9 @@ def getSpellingSuggestion(word):
     sim.sort(key= lambda x: x[1], reverse= True)
     # get top 3 suggestions
     for j, val in sim[0:3]:
+        if val < 0.2:
+            print('No movie exist with that name. Check your spelling.')
+            break
         print(allFeatures['original_title'][j])
     
 
@@ -138,7 +141,10 @@ def getTitleRecs():
             print(allFeatures['original_title'][i])
     except:
         print('Movie not found. Did you mean this:')
-        getSpellingSuggestion(title)
+        try:
+            getSpellingSuggestion(title)
+        except: 
+            print('Error!')
         getTitleRecs()
 
             
