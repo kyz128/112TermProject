@@ -10,7 +10,8 @@ from sklearn.metrics.pairwise import cosine_similarity
 credits= pd.read_csv('./the-movies-dataset/credits.csv', sep= ',')
 keywords= pd.read_csv('./the-movies-dataset/keywords.csv', sep= ',')
 # ratings= pd.read_csv('./the-movies-dataset/ratings.csv', sep= ',')
-fields= ['id', 'genres', 'title', 'vote_average', 'vote_count']
+fields= ['id', 'genres', 'original_title', 'release_date', 'vote_average', \
+'vote_count']
 metadata= pd.read_csv('./the-movies-dataset/movies_metadata.csv', sep= ',', \
 low_memory= False, usecols= fields)
 
@@ -34,6 +35,11 @@ metadata['id'] = metadata['id'].astype('int')
 # perform merging 
 allFeatures = metadata.merge(credits, on='id')
 allFeatures = allFeatures.merge(keywords, on='id')
+# sort rows by newest release date
+allFeatures.sort_values(by="release_date", ascending= False, inplace= True)
+# drop duplicate names; keep the newest movie
+allFeatures.drop_duplicates(subset= "original_title", keep="first", \
+inplace= True)
 # look at top 3 actors, plot keywords, and genre for recommendation criteria
 measures = ['cast','keywords', 'genres']
 for measure in measures:
@@ -82,8 +88,10 @@ def normalizeTitle(title):
     return words
 
 # create a reverse lookup table for movie id and normalized movie title
-allFeatures['title']= allFeatures['title'].apply(str)
-allFeatures['newTitle']= allFeatures['title'].apply(normalizeTitle)
+allFeatures['original_title']= allFeatures['original_title'].apply(str)
+allFeatures['newTitle']= allFeatures['original_title'].apply(normalizeTitle)
+# reset index to account for dropped rows
+allFeatures.reset_index(drop=True, inplace=True)
 indices = pd.Series(allFeatures.index, index=allFeatures['newTitle'])
 
 # get cosine similarity scores for all movies given a movie title
@@ -101,9 +109,9 @@ def similarTitle(word):
     # return similarity scores between movie title input & titles in data
     countVector = CountVectorizer(stop_words='english')
     # vocabulary from all titles
-    c = countVector.fit(allFeatures['title'])
+    c = countVector.fit(allFeatures['original_title'])
     # matrix of scores 
-    cosScore = cosine_similarity(c.transform([word]), c.transform(allFeatures['title']))
+    cosScore = cosine_similarity(c.transform([word]), c.transform(allFeatures['original_title']))
     return cosScore
 
 def getSpellingSuggestion(word):
@@ -112,7 +120,7 @@ def getSpellingSuggestion(word):
     sim.sort(key= lambda x: x[1], reverse= True)
     # get top 3 suggestions
     for j, val in sim[0:3]:
-        print(allFeatures['title'][j])
+        print(allFeatures['original_title'][j])
     
 
 def getTitleRecs():
@@ -127,7 +135,7 @@ def getTitleRecs():
         scoresLst.sort(key= lambda x: x[1], reverse= True)
         # get top 10 movie recs
         for i, score in scoresLst[1:11]:
-            print(allFeatures['title'][i])
+            print(allFeatures['original_title'][i])
     except:
         print('Movie not found. Did you mean this:')
         getSpellingSuggestion(title)
