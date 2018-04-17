@@ -115,20 +115,23 @@ def similarTitle(word):
     return cosScore
 
 def getSpellingSuggestion(word):
+    suggestionLst=[]
     simTitle= similarTitle(word)
     sim= list(enumerate(simTitle[0]))
     sim.sort(key= lambda x: x[1], reverse= True)
     # get top 3 suggestions
     for j, val in sim[0:3]:
-        if val < 0.2:
-            print('No movie exist with that name. Check your spelling.')
-            break
-        print(allFeatures['original_title'][j])
+        if sim[0][1] < 0.2:
+            return 'No movie exist with that name. Check your spelling.'
+        cautionText= 'Movie not found. Did you mean this:'
+        suggestionLst.append(allFeatures['original_title'][j])
+    return cautionText, suggestionLst
     
 
-def getTitleRecs():
+def getTitleRecs(inputTitle):
+    titlesLst=[]
     try:
-        title= str(input('Enter a movie title: '))
+        title= inputTitle
         # normalize input
         normTitle= normalizeTitle(title)
         scores= showCos(normTitle)
@@ -137,17 +140,16 @@ def getTitleRecs():
         # sort the tuples by the score
         scoresLst.sort(key= lambda x: x[1], reverse= True)
         # get top 10 movie recs
+        successText= 'You might like these movies:'
         for i, score in scoresLst[1:11]:
-            print(allFeatures['original_title'][i])
+            titlesLst.append(allFeatures['original_title'][i])
+        return successText, titlesLst
     except:
-        print('Movie not found. Did you mean this:')
         try:
-            getSpellingSuggestion(title)
+            return getSpellingSuggestion(inputTitle)
         except: 
-            print('Error!')
-        getTitleRecs()
+            return 'Error!', []
 
-            
 # def getFavoriteRecs(favorites):
 #     searchAttr= list()
 #     if len(favorites) ==0:
