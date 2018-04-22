@@ -40,6 +40,7 @@ class UI(Tk):
         self.canvas.pack()
         self.favoriteLst= []
         self.titleLst= ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"]
+        self.searchImage= PhotoImage(file="./images/searchScreen.png")
         self.welcomeScreen()
     
     def welcomeScreen(self):
@@ -54,29 +55,52 @@ class UI(Tk):
         'Title Recommendations', command=self.titleScreen)
         self.options.config(bg= "black", fg= "white",font= "Helvetica 15")
         self.options['menu'].config(bg= "black", fg= "white", font= "Helvetica 12")
-        self.options['menu'].add_command(label='Genre Recommendations', command="")
+        self.options['menu'].add_command(label='Genre Recommendations', command=self.genreScreen)
         self.options['menu'].add_command(label='Mood Recommendations', command= "")
         self.canvas.create_window(self.width/3, self.height/4*3, window=self.options)
 
+    def genreScreen(self):
+        self.canvas.delete('all')
+        self.canvas.create_image(self.width/2, self.height/2, \
+         image= self.searchImage)  
+        self.canvas.create_text(self.width/2+20, self.height/6, text= "Genres", fill= "black", font= "Helvetica 18 bold")
+        self.homeButton= Button(self, text= "Home", width= 10, bg= "black", fg= "white", command= self.welcomeScreen)
+        self.canvas.create_window(self.width/12, self.height/12, window=self.homeButton)
+        self.genreList= ['Action', 'Adventure', 'Animation', 'Comedy', 'Crime', 'Drama', 'Documentary', 'Family', 'Fantasy', 'Horror', 'Music', 'Mystery', 'Romance', 'Science Fiction', 'Thriller', 'War']
+        self.longestLine= max([len(i) for i in self.genreList])
+        for i in range(len(self.genreList)):
+            self.b= Button(self, width= self.longestLine, text=self.genreList[i], bg= "black", fg= "white", command=lambda i=i:self.favoriteScreen(self.genreList[i]))
+            if i> (len(self.genreList)-1)//2:
+                self.canvas.create_window(self.width/2+self.longestLine*10, self.height/4+ i%(len(self.genreList)//2)*self.longestLine*3, window= self.b, anchor= NE)
+            else:
+                self.canvas.create_window(self.width/2, self.height/4+ i*self.longestLine*3, window= self.b, anchor= NE)
+        
+    def favoriteScreen(self, genre):
+        self.canvas.delete('all')
+        self.canvas.create_image(self.width/2, self.height/2, \
+         image= self.searchImage)  
+        self.canvas.create_text(self.width/2+20, self.height/6, text= genre, fill= "black", font= "Helvetica 18 bold")
+        self.homeButton= Button(self, text= "Home", width= 10, bg= "black", fg= "white", command= self.welcomeScreen)
+        self.canvas.create_window(self.width/12, self.height/12, window=self.homeButton)
+    
     def titleScreen(self, val=""):
         self.canvas.delete('all')
-        self.searchImage= PhotoImage(file="./images/searchScreen.png")
         self.canvas.create_image(self.width/2, self.height/2, \
          image= self.searchImage)  
         self.inputBox = Entry(self.canvas, font= "Helvetica 18")
         self.canvas.create_text(self.width/2, self.height/5, text= "Enter a movie title here", fill= "black", font= "Helvetica 18 bold")
         self.canvas.create_window(self.width/2, self.height/3, window=self.inputBox)
-        self.recButton= Button(self, text= "Get Recs", width= 10, bg= "black", fg= "white", command= self.showTerminal) 
+        self.recButton= Button(self, text= "Get Recs", width= 10, bg= "black", fg= "white", command= self.showMovies) 
         self.canvas.create_window(self.width/4*3, self.height/3, window=self.recButton)
         self.homeButton= Button(self, text= "Home", width= 10, bg= "black", fg= "white", command= self.welcomeScreen)
         self.canvas.create_window(self.width/12, self.height/12, window=self.homeButton)
         
-    def showTerminal(self):
+    def showMovies(self):
         for i in range(10):
-            self.titleButton= Button(self, text= self.titleLst[i], width= self.inputBox['width'], bg= "black", fg= "white", command=lambda i=i:self.newScreen(self.titleLst[i]))
+            self.titleButton= Button(self, text= self.titleLst[i], width= self.inputBox['width'], bg= "black", fg= "white", command=lambda i=i:self.movieScreen(self.titleLst[i]))
             self.canvas.create_window(self.width/2, self.height/2+i*20, window=self.titleButton)
     
-    def newScreen(self, title):
+    def movieScreen(self, title):
         self.canvas.delete('all')
         self.homeButton2= Button(self, text= "Home", width= 10, bg= "black", fg= "white", command= self.welcomeScreen)
         self.canvas.create_window(self.width/12, self.height/12, window=self.homeButton2)
