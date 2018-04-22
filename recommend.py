@@ -102,7 +102,7 @@ def showCos(title):
     # get corresponding search string
     vocab= (allFeatures['search'][i]).split(" ")
     countVector = CountVectorizer(stop_words='english', vocabulary= vocab)
-    countData = countVector.fit_transform(allFeatures['search'])
+    countData = countVector.transform(allFeatures['search'])
     cosScore = cosine_similarity(countData[i], countData)
     return cosScore
 
@@ -151,23 +151,42 @@ def getTitleRecs(inputTitle):
         except: 
             return 'Error!', []
 
-# def getFavoriteRecs(favorites):
-#     searchAttr= list()
-#     if len(favorites) ==0:
-#         print("Nothing in favorites")
-#     else:
-#         for i in favorites:
-#             newTitle= normalizeTitle(i)
-#             inx= indices[newTitle]
-#             searchAttr+= allFeatures['search'][inx]
-#         s= set(searchAttr.split())
-#     countVector = CountVectorizer(stop_words='english')
-#     c = countVector.fit(allFeatures['search'])
-#     cosScore = cosine_similarity(c.transform(list(s), c.transform(allFeatures['search']))
-#     scoresLst= list(enumerate(scores[0]))
-#     scoresLst.sort(key= lambda x: x[1], reverse= True)
-#     for i, score in scoresLst[1:11]:
-#         print(allFeatures['title'][i])
+def showFavCos(titleLst):
+    # suppress duplicate recommendation criteria
+    allVocab=set()
+    for i in titleLst:
+        inx= indices[i]
+        vocab= (allFeatures['search'][inx]).split(" ")
+        for j in vocab:
+            allVocab.add(j)
+    # same format as the data in search column of dataframe
+    aggregateSearch= " ".join(list(allVocab))
+    countVector = CountVectorizer(stop_words='english')
+    countData = countVector.fit(allFeatures["search"])
+    cosScore = cosine_similarity(countVector.transform([aggregateSearch]), countVector.transform(allFeatures['search']))
+    return cosScore
+    
+def getFavorites(favList):
+    if len(favList)==0:
+        return "Nothing in favorites", []
+    titlesLst=[]
+    newFavList=[]
+    #don't return any of the titles inputed as recommendations
+    skipNum= len(favList) 
+    try:
+        for i in favList:
+            j=normalizeTitle(i)
+            newFavList.append(j)
+        #normalize all titles in favorites
+        scores= showFavCos(newFavList)
+        favScores= list(enumerate(scores[0]))
+        favScores.sort(key= lambda x: x[1], reverse= True)
+        successText= 'You might like these movies:'
+        for k, score in favScores[skipNum+1:skipNum+11]:
+            titlesLst.append(allFeatures['original_title'][k])
+        return successText, titlesLst
+    except:
+        return "Error!", []
     
             
 
