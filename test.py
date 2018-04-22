@@ -21,12 +21,13 @@
 
 
 
-#image from 
+#images from 
 #https://www.listchallenges.com/movies-that-you-cant-live-life-without-seeing
 #https://www.pinterest.com/pin/414683078161007928/
 #https://www.123rf.com/photo_3985403_tv-channel-movie-guide-on-abstract-background.html
+#http://www.pixempire.com/icon/square-with-star-icon.html
 
-from PIL import ImageTk
+
 from tkinter import *
 
 class UI(Tk):
@@ -37,12 +38,13 @@ class UI(Tk):
         self.canvas = Canvas(self, width = self.width, height = \
         self.height)
         self.canvas.pack()
+        self.favoriteLst= []
+        self.titleLst= ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"]
         self.welcomeScreen()
     
     def welcomeScreen(self):
         self.canvas.delete('all')
-        self.image= ImageTk.PhotoImage(file= \
-         "./images/startImage.png")
+        self.image= PhotoImage(file= "./images/startImage.png")
         self.canvas.create_image(self.width/2, self.height/2, \
          image= self.image)
         self.canvas.create_text(self.width/3, self.height/3, text= "MovieScout", font= "Helvetica 48 bold", fill= "black")
@@ -58,8 +60,7 @@ class UI(Tk):
 
     def titleScreen(self, val=""):
         self.canvas.delete('all')
-        self.searchImage= ImageTk.PhotoImage(file= \
-         "./images/searchScreen.png")
+        self.searchImage= PhotoImage(file="./images/searchScreen.png")
         self.canvas.create_image(self.width/2, self.height/2, \
          image= self.searchImage)  
         self.inputBox = Entry(self.canvas, font= "Helvetica 18")
@@ -71,20 +72,59 @@ class UI(Tk):
         self.canvas.create_window(self.width/12, self.height/12, window=self.homeButton)
         
     def showTerminal(self):
-        self.canvas.delete('movie')
-        inputText= str(self.inputBox.get())
         for i in range(10):
-            self.titleButton= Button(self, text= inputText + str(i), width= self.inputBox['width'], bg= "black", fg= "white", command=self.newScreen)
+            self.titleButton= Button(self, text= self.titleLst[i], width= self.inputBox['width'], bg= "black", fg= "white", command=lambda i=i:self.newScreen(self.titleLst[i]))
             self.canvas.create_window(self.width/2, self.height/2+i*20, window=self.titleButton)
     
-    def newScreen(self):
+    def newScreen(self, title):
         self.canvas.delete('all')
         self.homeButton2= Button(self, text= "Home", width= 10, bg= "black", fg= "white", command= self.welcomeScreen)
         self.canvas.create_window(self.width/12, self.height/12, window=self.homeButton2)
-        self.movieBg= ImageTk.PhotoImage(file= \
-            "./images/movieScreen.png")
-        self.canvas.create_image(self.width/2, self.height/2, \
-            image= self.movieBg)
+        self.movieBg= PhotoImage(file="./images/movieScreen.png")
+        self.canvas.create_image(self.width/2, self.height/2, image= self.movieBg)
+        self.canvas.create_text(self.width/3, self.height/6, text= title, font= "Helvetica 18", anchor= NW)
+        self.canvas.create_text(self.width/3, self.height/4, text= "Genre", anchor= NW, font= "Helvetica 12")
+        self.canvas.create_text(self.width/3, self.height/4+20, text= "Released Year", anchor= NW, font= "Helvetica 12")
+        self.canvas.create_text(self.width/3, self.height/4+40, text= "Rating", anchor= NW, font= "Helvetica 12")
+        self.photo= PhotoImage(file= './images/photo.png')
+        self.canvas.create_image(self.width/5,self.height/3, image= self.photo)
+        self.text= self.reformatPlot("""Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.""")
+        self.canvas.create_text(self.width/3, self.height/20*9, text=self.text, anchor= NW)
+        if title not in self.favoriteLst:
+            self.removeFavorite(title)
+        else:
+            self.addFavorite(title)
+    
+    def addFavorite(self, title):
+        self.canvas.delete("unfav")
+        self.favorite= PhotoImage(file= "./images/favorite.png")
+        self.favButton= Button(self, text="Unfavorite  ", command= lambda: self.removeFavorite(title))
+        self.favButton.config(image= self.favorite, compound= LEFT)
+        self.canvas.create_window(self.width/3, self.height/4+70, window= self.favButton, anchor= NW, tags= "fav")
+        if title not in self.favoriteLst:
+            self.favoriteLst.append(title)
+        print(self.favoriteLst)
+    
+    def removeFavorite(self, title):
+        self.canvas.delete('fav')
+        self.unfavorite= PhotoImage(file= "./images/unfavorite.png")
+        self.favButton= Button(self, text="Favorite  ", command= lambda: self.addFavorite(title))
+        self.favButton.config(image= self.unfavorite, compound= LEFT)
+        self.canvas.create_window(self.width/3, self.height/4+70, window= self.favButton, anchor= NW, tags= "unfav")
+        if len(self.favoriteLst) > 0 and title in self.favoriteLst:
+            self.favoriteLst.remove(title)
+        print(self.favoriteLst)
+    
+    def reformatPlot(self, text):
+        sText= text.split()
+        plotlst= []
+        for i in sText:
+            if len(plotlst)%10==0:
+                plotlst.append("\n")
+            plotlst.append(i)
+        return " ".join(plotlst)
+        
+        
 
 recUI = UI()
 recUI.mainloop()
