@@ -6,6 +6,7 @@ import string
 from ast import literal_eval
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+import math
 
 # read the data files
 credits= pd.read_csv('./the-movies-dataset/credits.csv', sep= ',')
@@ -188,7 +189,13 @@ def getFavorites(favList):
     except:
         return "Error!", []
     
-            
+allFeatures["weighted_rating"]= 5*allFeatures["vote_average"]/10 + 5*(1-math.e**(-allFeatures["vote_count"]/10)).round(2)
+
+def getGenreRec(genre):
+    genreNorm= normalizeTitle(genre)
+    slice= allFeatures[allFeatures["genres_test"].str.contains(genreNorm)]
+    slice.sort_values(by= "weighted_rating", inplace= True, ascending= False)
+    return slice[0:10]
 
 
 
