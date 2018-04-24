@@ -40,7 +40,6 @@ class UI(Tk):
         self.height)
         self.canvas.pack()
         self.favoriteLst= []
-        self.titleLst2= ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"]
         self.searchImage= PhotoImage(file="./images/searchScreen.png")
         self.welcomeScreen()
     
@@ -86,8 +85,9 @@ class UI(Tk):
         self.canvas.create_text(self.width/2+20, self.height/6, text= genre, fill= "black", font= "Helvetica 18 bold")
         self.homeButton= Button(self, text= "Home", width= 10, bg= "black", fg= "white", command= self.welcomeScreen)
         self.canvas.create_window(self.width/12, self.height/12, window=self.homeButton)
-        for i in range(10):
-            self.genreButton= Button(self, text= self.titleLst2[i], width= max([len(i) for i in self.genreList]), bg= "black", fg= "white", command=lambda i=i:self.movieScreen(self.titleLst2[i]))
+        self.topGenreLst= getGenreRec(genre)
+        for i in range(len(self.topGenreLst)):
+            self.genreButton= Button(self, text= self.topGenreLst[i], width= max([len(i) for i in self.topGenreLst]), bg= "black", fg= "white", command=lambda i=i:self.movieScreen(self.topGenreLst[i]))
             self.canvas.create_window(self.width/2+20, self.height/3+i*20, window=self.genreButton)
             
     
@@ -103,11 +103,6 @@ class UI(Tk):
         self.canvas.create_window(self.width/4*3, self.height/3, window=self.recButton)
         self.homeButton= Button(self, text= "Home", width= 10, bg= "black", fg= "white", command= self.welcomeScreen)
         self.canvas.create_window(self.width/12, self.height/12, window=self.homeButton)
-    
-    def callAgain(self, title):
-        self.titleScreen(self)
-        self.againMsg, self.againTitles= getTitleRecs(str(title))
-        return self.againMsg, self.againTitles
         
     def showMovies(self, title=""):
         self.canvas.delete("msg")

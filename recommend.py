@@ -199,10 +199,10 @@ def getFavorites(favList):
 
 def getGenreRec(genre):
     genreNorm= normalizeTitle(genre)
-    allFeaturesCopy=allFeatures.copy(deep=True)
-    slice= allFeaturesCopy[allFeaturesCopy["genresStr"].str.contains(genreNorm)]
-    slice.sort_values(by= "weighted_rating", inplace= True, ascending= False)
-    return slice["original_title"][0:10]
+    sliced= allFeatures[allFeatures["genresStr"].str.contains(genreNorm)].copy(deep=True)
+    sliced.sort_values(by= "weighted_rating", inplace= True, ascending= False)
+    sliced.reset_index(drop=True, inplace= True)
+    return sliced["original_title"][0:10]
 
 def getMovieData(title):
     normTitle= normalizeTitle(title)
