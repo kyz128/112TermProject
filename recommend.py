@@ -13,7 +13,7 @@ credits= pd.read_csv('./the-movies-dataset/credits.csv', sep= ',')
 keywords= pd.read_csv('./the-movies-dataset/keywords.csv', sep= ',')
 # ratings= pd.read_csv('./the-movies-dataset/ratings.csv', sep= ',')
 fields= ['id', 'genres', 'original_title', 'release_date', 'vote_average', \
-'vote_count']
+'vote_count', 'overview']
 metadata= pd.read_csv('./the-movies-dataset/movies_metadata.csv', sep= ',', \
 low_memory= False, usecols= fields)
 
@@ -72,11 +72,19 @@ for measure in measures:
     allFeatures[measure]= allFeatures[measure].apply(getTop3)
     allFeatures[measure]= allFeatures[measure].apply(lowerStripSpace)
 
+# weighted rating formula adapted from https://math.stackexchange.com/questions/942738/algorithm-to-calculate-rating-based-on-multiple-reviews-using-both-review-score
+
+allFeatures["weighted_rating"]= 5*allFeatures["vote_average"]/10 + 5*(1-math.e**(-allFeatures["vote_count"]/10)).round(2)
+
+def toString(lst):
+    return " ".join(lst)
+
 def searchString(movie):
     return ' '.join(movie['keywords']) + ' ' + ' '.join(movie['cast']) + ' ' \
     + ' '.join(movie['genres'])
 
 allFeatures['search'] = allFeatures.apply(searchString, axis='columns')
+allFeatures["genresStr"]= allFeatures['genres'].apply(toString)
 
 ###############################################################################
 # Machine Learning
@@ -188,14 +196,18 @@ def getFavorites(favList):
         return successText, titlesLst
     except:
         return "Error!", []
-    
-allFeatures["weighted_rating"]= 5*allFeatures["vote_average"]/10 + 5*(1-math.e**(-allFeatures["vote_count"]/10)).round(2)
 
 def getGenreRec(genre):
     genreNorm= normalizeTitle(genre)
-    slice= allFeatures[allFeatures["genres_test"].str.contains(genreNorm)]
+    allFeaturesCopy=allFeatures.copy(deep=True)
+    slice= allFeaturesCopy[allFeaturesCopy["genresStr"].str.contains(genreNorm)]
     slice.sort_values(by= "weighted_rating", inplace= True, ascending= False)
-    return slice[0:10]
+    return slice["original_title"][0:10]
+
+def getMovieData(title):
+    normTitle= normalizeTitle(title)
+    i= indices[normTitle]
+    return allFeatures["genres"][i], allFeatures["release_date"][i], allFeatures["weighted_rating"][i], allFeatures["overview"][i]
 
 
 
