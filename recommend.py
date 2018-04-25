@@ -72,9 +72,12 @@ for measure in measures:
     allFeatures[measure]= allFeatures[measure].apply(getTop3)
     allFeatures[measure]= allFeatures[measure].apply(lowerStripSpace)
 
-# weighted rating formula adapted from https://math.stackexchange.com/questions/942738/algorithm-to-calculate-rating-based-on-multiple-reviews-using-both-review-score
+# weighted rating formula adapted from 
+#https://math.stackexchange.com/questions/942738/
+#algorithm-to-calculate-rating-based-on-multiple-reviews-using-both-review-score
 
-allFeatures["weighted_rating"]= 5*allFeatures["vote_average"]/10 + 5*(1-math.e**(-allFeatures["vote_count"]/10)).round(2)
+allFeatures["weighted_rating"]= 5*allFeatures["vote_average"]/10 + \
+ 5*(1-math.e**(-allFeatures["vote_count"]/10)).round(2)
 
 def toString(lst):
     return " ".join(lst)
@@ -121,7 +124,8 @@ def similarTitle(word):
     # vocabulary from all titles
     c = countVector.fit(allFeatures['original_title'])
     # matrix of scores 
-    cosScore = cosine_similarity(c.transform([word]), c.transform(allFeatures['original_title']))
+    cosScore = cosine_similarity(c.transform([word]), \
+    c.transform(allFeatures['original_title']))
     return cosScore
 
 def getSpellingSuggestion(word):
@@ -172,7 +176,8 @@ def showFavCos(titleLst):
     aggregateSearch= " ".join(list(allVocab))
     countVector = CountVectorizer(stop_words='english')
     countData = countVector.fit(allFeatures["search"])
-    cosScore = cosine_similarity(countVector.transform([aggregateSearch]), countVector.transform(allFeatures['search']))
+    cosScore = cosine_similarity(countVector.transform([aggregateSearch]), \
+    countVector.transform(allFeatures['search']))
     return cosScore
     
 def getFavorites(favList):
@@ -198,16 +203,22 @@ def getFavorites(favList):
         return "Error!", []
 
 def getGenreRec(genre):
+    # return top 10 movies given genre
     genreNorm= normalizeTitle(genre)
-    sliced= allFeatures[allFeatures["genresStr"].str.contains(genreNorm)].copy(deep=True)
+    #filter movies by genre
+    sliced= \
+    allFeatures[allFeatures["genresStr"].str.contains(genreNorm)].copy(deep=True)
+    # sort by rating descending
     sliced.sort_values(by= "weighted_rating", inplace= True, ascending= False)
     sliced.reset_index(drop=True, inplace= True)
     return sliced["original_title"][0:10]
 
 def getMovieData(title):
+    # return genre, released date, rating, and plot 
     normTitle= normalizeTitle(title)
     i= indices[normTitle]
-    return allFeatures["genres"][i], allFeatures["release_date"][i], allFeatures["weighted_rating"][i], allFeatures["overview"][i]
+    return allFeatures["genres"][i], allFeatures["release_date"][i], \
+    allFeatures["weighted_rating"][i], allFeatures["overview"][i]
 
 
 

@@ -1,33 +1,345 @@
-# user interface for recommendation engine
+# User interface
+
+#images from 
+#https://www.listchallenges.com/movies-that-you-cant-live-life-without-seeing
+#https://www.pinterest.com/pin/414683078161007928/
+#https://www.123rf.com/photo_3985403_tv-channel-movie-guide-on-abstract-background.html
+#http://www.pixempire.com/icon/square-with-star-icon.html
+#https://br.freepik.com/icones-gratis/pagina-web-pagina-inicial_768343.htm
+
 from tkinter import *
-from recommend import * 
-def showTerminal():
-    # clear screen every time has new input
-    canvas.delete('msg', 'movie')
-    # user input value 
-    inputText= str(e1.get())
-    # run recommend function
-    msg, lst= getTitleRecs(inputText)
-    # output results on canvas
-    canvas.create_text(450, 185, text=msg, fill= "white", font= "Helvetica 12", tags= 'msg')
-    for i in range(len(lst)):
-        canvas.create_text(450, 205+i*20, text= lst[i], fill= "white", font= "Helvetica 12", tags= 'movie')
+from recommend import *
 
-#initalize tk screen
-root = Tk()
-canvas = Canvas(root, width = 900, height = 500)
-canvas.pack()
-canvas.create_rectangle(0,0,960, 540, fill= "black")
-# initalize 1-line text input box
-e1 = Entry(canvas)
-canvas.create_text(450, 100, text= "Enter a movie title here", fill= "white", font= "Helvetica 18")
-# bind text input box to a window, placing it on canvas
-canvas.create_window(400, 150, window=e1)
-# create button; bind to function showTerminal
-b= Button(root, text= "Get Recs", width= 10, command= showTerminal)
-# place button on canvas
-canvas.create_window(530, 150, window=b)
-root.mainloop()
+class UI(Tk):
+    def __init__(self):
+        Tk.__init__(self)
+        self.width= 900
+        self.height= 500
+        self.canvas = Canvas(self, width = self.width, height = \
+        self.height)
+        self.canvas.pack()
+        # initalize favorites list
+        self.favoriteLst= []
+        # keeps track of current recommendation method and screen
+        self.currentScreen= None
+        self.currentListing= None
+        self.searchImage= PhotoImage(file="./images/searchScreen.png")
+        self.home= PhotoImage(file="./images/home.png")
+        self.welcomeScreen()
+    
+    def welcomeScreen(self):
+        # first screen that displays
+        self.canvas.delete('all')
+        self.startImage= PhotoImage(file= "./images/startImage.png")
+        self.canvas.create_image(self.width/2, self.height/2, \
+         image= self.startImage)
+        self.canvas.create_text(self.width/3, self.height/3, \
+        text= "MovieScout", font= "Helvetica 48 bold", fill= "black")
+        self.var = StringVar(self)
+        self.var.set('Getting Started')
+        # create drop-down menu 
+        self.options = OptionMenu(self, self.var, "Title Recommendations", \
+        command=self.titleScreen)
+        self.options.config(bg= "black", fg= "white",font= "Helvetica 15")
+        self.options['menu'].config(bg= "black", fg= "white", \
+        font= "Helvetica 12")
+        self.options['menu'].add_command(label='Genre Recommendations', \
+        command=self.genreScreen)
+        self.options['menu'].add_command(label='Mood Recommendations', \
+        command= "")
+        self.canvas.create_window(self.width/3, self.height/4*3, \
+        window=self.options)
 
+    def genreScreen(self):
+        self.canvas.delete('all')
+        self.canvas.create_image(self.width/2, self.height/2, \
+         image= self.searchImage)  
+        self.canvas.create_text(self.width/2+20, self.height/6, \
+        text= "Genres", fill= "black", font= "Helvetica 18 bold")
+        # home button returns to starting page
+        self.homeButton= Button(self, bg= "black", fg= "white", \
+        command= self.welcomeScreen)
+        self.homeButton.config(image= self.home, compound= CENTER)
+        self.canvas.create_window(self.width/12, self.height/12*11, \
+        window=self.homeButton)
+        self.favListButton= Button(self, text= "See Favorites", \
+        width=len("See Favorites"), bg= "black", fg= "white", \
+        command= self.showFavList)
+        self.canvas.create_window(self.width/6*5, self.height/12, \
+        window=self.favListButton)
+        self.genreList= ['Action', 'Adventure', 'Animation', 'Comedy', \
+        'Crime', 'Drama', 'Documentary', 'Family', 'Fantasy', 'Horror', \
+        'Music', 'Mystery', 'Romance', 'Science Fiction', 'Thriller', 'War']
+        self.longestLine= max([len(i) for i in self.genreList])
+        for i in range(len(self.genreList)):
+            self.b= Button(self, width= self.longestLine, \
+            text=self.genreList[i], bg= "black", fg= "white", \
+            command=lambda i=i:self.topGenreScreen(self.genreList[i]))
+            # genre listing in 2 columns
+            if i> (len(self.genreList)-1)//2:
+                self.canvas.create_window(self.width/2+self.longestLine*10, \
+                self.height/4+ i%(len(self.genreList)//2)*self.longestLine*3, \
+                window= self.b, anchor= NE)
+            else:
+                self.canvas.create_window(self.width/2, \
+                self.height/4+ i*self.longestLine*3, window= self.b, anchor= NE)
+        
+    def topGenreScreen(self, genre):
+        # display listing of top 10 movies given a genre
+        self.canvas.delete('all')
+        self.currentScreen= "moviesGenreLst"
+        self.currentListing= "genres"
+        self.canvas.create_image(self.width/2, self.height/2, \
+         image= self.searchImage)  
+        self.canvas.create_text(self.width/2+20, self.height/6, \
+        text= genre, fill= "black", font= "Helvetica 18 bold")
+        self.homeButton= Button(self, bg= "black", fg= "white", \
+        command= self.welcomeScreen)
+        self.homeButton.config(image= self.home, compound= CENTER)
+        self.canvas.create_window(self.width/12, self.height/12*11, \
+        window=self.homeButton)
+        self.favListButton= Button(self, text= "See Favorites", \
+        width=len("See Favorites"), bg= "black", fg= "white", \
+        command= self.showFavList)
+        self.canvas.create_window(self.width/6*5, self.height/12, \
+        window=self.favListButton)
+        # back button returns to the genre listing
+        self.backButton= Button(self, text="Back", width=10, bg= "black", \
+        fg="white", command=self.previousListing)
+        self.canvas.create_window(self.width/12, self.height/12, \
+        window= self.backButton )
+        # save current genre selected to return to that genre listing page 
+        # if needed
+        self.genreSelected= genre
+        self.topGenreLst= getGenreRec(genre)
+        for i in range(len(self.topGenreLst)):
+            self.genreButton= Button(self, text= self.topGenreLst[i], \
+            width= max([len(i) for i in self.topGenreLst]), bg= "black", \
+            fg= "white", \
+            # pass in current i for the corresponding button selected
+            command=lambda i=i:self.movieScreen(self.topGenreLst[i]))
+            self.canvas.create_window(self.width/2+20, self.height/3+i*20, \
+            window=self.genreButton)
+            
+    def titleScreen(self, val=""):
+        # movie recs by title here
+        self.canvas.delete('all')
+        self.currentScreen= "moviesTitleLst"
+        self.canvas.create_image(self.width/2, self.height/2, \
+         image= self.searchImage)  
+        # enter movie title in text entry box
+        self.inputBox = Entry(self.canvas, font= "Helvetica 18")
+        self.canvas.create_text(self.width/2, self.height/5, \
+        text= "Enter a movie title here", fill= "black", \
+        font= "Helvetica 18 bold")
+        self.canvas.create_window(self.width/2, self.height/3, \
+        window=self.inputBox)
+        self.recButton= Button(self, text= "Get Recs", width= 10, \
+        bg= "black", fg= "white", command= self.showMovies) 
+        self.canvas.create_window(self.width/4*3, self.height/3, \
+        window=self.recButton)
+        self.homeButton= Button(self, bg= "black", fg= "white", \
+        command= self.welcomeScreen)
+        self.homeButton.config(image= self.home, compound= CENTER)
+        self.canvas.create_window(self.width/12, self.height/12*11, \
+        window=self.homeButton)    
+        
+    def showMovies(self, title=""):
+        # delete previous title recs output
+        self.canvas.delete("msg", "movieLst")
+        # display top 10 title recs
+        # save input text/results of search for when back button pressed
+        self.inputText= self.inputBox.get()
+        # if title not misspelled, pass inputText into ML function 
+        if title=="":
+            self.msg, self.titleLst= getTitleRecs(str(self.inputText))
+        else: 
+            self.msg, self.titleLst= getTitleRecs(str(title))
+        self.canvas.create_text(self.width/2, self.height/20*9, \
+        text=self.msg, fill= "blue", font= "Helvetica 12 bold", tags= "msg")
+        for i in range(len(self.titleLst)):
+             # if misspelled title input call title recs again but pass 
+            # in suggested title
+            if self.msg=='Movie not found. Did you mean this:':
+                self.titleButton= Button(self, text= self.titleLst[i], \
+                width= max([len(i) for i in self.titleLst]), bg= "black", \
+                fg= "white", \
+                command=lambda i=i:self.showMovies(self.titleLst[i]))
+            else: 
+                self.titleButton= Button(self, text= self.titleLst[i], \
+                width= max([len(i) for i in self.titleLst]), bg= "black", \
+                fg= "white", \
+                command=lambda i=i:self.movieScreen(self.titleLst[i]))
+            self.canvas.create_window(self.width/2, self.height/2+i*20, \
+            window=self.titleButton, tags="movieLst")
+    
+    def previousSearch(self):
+        # when back button pressed on the movie description screen
+        self.canvas.delete("all")
+        # if currently doing title recs, display previous search output
+        if self.currentScreen=="moviesTitleLst":
+            self.titleScreen()
+            self.showMovies(self.inputText)
+        # if genre recs, return to the given genre page with movie listing
+        elif self.currentScreen=="moviesGenreLst":
+            self.topGenreScreen(self.genreSelected)
+        # if fav recs, return to listing of favorite recs
+        elif self.currentScreen=="moviesFavLst":
+            self.favoriteMovies()
+    
+    def previousListing(self):
+        # when back button pressed on the listing pages
+        # if on specific genre page, return to listing of all genres
+        if self.currentListing=="genres":
+            self.genreScreen()
+        # if on favorite recs page, return to list of favorite movies
+        elif self.currentListing=="favs":
+            self.showFavList()
+    
+    def movieScreen(self, title):
+        # displays movie info (e.g. plot, year, name, etc.) given title
+        self.mGenre, self.mDate, self.mRate, self.mPlot= getMovieData(title)
+        self.canvas.delete('all')
+        self.homeButton= Button(self, bg= "black", fg= "white", \
+        command= self.welcomeScreen)
+        self.homeButton.config(image= self.home, compound= CENTER)
+        self.canvas.create_window(self.width/12, self.height/12*11, \
+        window=self.homeButton)
+        #see favorites list
+        self.favListButton= Button(self, text= "See Favorites", \
+        width=len("See Favorites"), bg= "black", fg= "white", \
+        command= self.showFavList)
+        self.canvas.create_window(self.width/6*5, self.height/12, \
+        window=self.favListButton)
+        self.backButton= Button(self, text="Back", width=10, bg= "black", \
+        fg="white", command=self.previousSearch)
+        self.canvas.create_window(self.width/12, self.height/12, \
+        window= self.backButton )
+        self.movieBg= PhotoImage(file="./images/movieScreen.png")
+        self.canvas.create_image(self.width/2, self.height/2, \
+        image= self.movieBg)
+        self.canvas.create_text(self.width/3, self.height/6, \
+        text= title, font= "Helvetica 18 bold", anchor= NW)
+        self.canvas.create_text(self.width/3, self.height/4, \
+        text= "Genres: %s" % str(self.mGenre), anchor= NW, font="Helvetica 12")
+        self.canvas.create_text(self.width/3, self.height/4+20,\
+        text= "Released Date: %s" % str(self.mDate), anchor= NW, \
+        font= "Helvetica 12")
+        # round rating to 2 decimal places
+        self.canvas.create_text(self.width/3, self.height/4+40, \
+        text= "Rating: %0.2f" % float(self.mRate), anchor= NW, \
+        font= "Helvetica 12")
+        # placeholder image for movie poster
+        self.photo= PhotoImage(file= './images/photo.png')
+        self.canvas.create_image(self.width/5,self.height/3, image= self.photo)
+        self.text= self.reformatPlot(self.mPlot)
+        self.canvas.create_text(self.width/3, self.height/20*9, \
+        text= self.text, anchor= NW)
+        # control display of the favorite button when revisitng a movie
+        if title not in self.favoriteLst:
+            self.removeFavorite(title)
+        else:
+            self.addFavorite(title)
+    
+    def showFavList(self):
+        # list of favorited movies on screen
+        self.canvas.delete('all')
+        self.canvas.create_image(self.width/2, self.height/2, \
+         image= self.searchImage)
+        self.canvas.create_text(self.width/2+20, self.height/6, \
+        text= "Favorites", fill= "black", font= "Helvetica 18 bold")
+        self.homeButton= Button(self, bg= "black", fg= "white", \
+        command= self.welcomeScreen)
+        self.homeButton.config(image= self.home, compound= CENTER)
+        self.canvas.create_window(self.width/12, self.height/12*11, \
+        window=self.homeButton)
+        self.favRecsButton= Button(self, text= "Get Fav Recs", \
+        width=len("Get Fav Recs"), bg= "black", fg= "white", \
+        command=self.favoriteMovies)
+        self.canvas.create_window(self.width/6*5, self.height/12, \
+        window=self.favRecsButton)
+        # when fav list empty
+        if len(self.favoriteLst)==0:
+            self.canvas.create_text(self.width/2, self.height/3, \
+            text="Nothing in Favorites!", fill= "blue", \
+            font="Helvetica 14 bold")
+        else: 
+            for i in range(len(self.favoriteLst)):
+                self.favMovieButton= Button(self, text= self.favoriteLst[i], \
+                width= max([len(i) for i in self.favoriteLst]), bg= "black",\
+                 fg= "white", \
+                 command=lambda i=i:self.movieScreen(self.favoriteLst[i]))
+                self.canvas.create_window(self.width/2+20, self.height/3+i*20,\
+                window=self.favMovieButton)
+    
+    def favoriteMovies(self):
+        # rec screen based on favorites list
+        self.canvas.delete("all")
+        self.currentScreen= "moviesFavLst"
+        self.currentListing="favs"
+        self.canvas.create_image(self.width/2, self.height/2, \
+         image= self.searchImage)
+        self.homeButton= Button(self, bg= "black", fg= "white", \
+        command= self.welcomeScreen)
+        self.homeButton.config(image= self.home, compound= CENTER)
+        self.canvas.create_window(self.width/12, self.height/12*11, \
+        window=self.homeButton)
+        self.backButton= Button(self, text="Back", width=10, bg= "black", \
+        fg="white", command=self.previousListing)
+        self.canvas.create_window(self.width/12, self.height/12, \
+        window= self.backButton )
+        self.canvas.create_text(self.width/2, self.height/5, \
+        text= "Favorites Recommendation", fill= "black", \
+        font= "Helvetica 18 bold")
+        self.favMsg, self.favTitles= getFavorites(self.favoriteLst)
+        self.canvas.create_text(self.width/2, self.height/3, \
+        text= self.favMsg, fill= "blue", font= "Helvetica 12 bold")
+        for i in range(len(self.favTitles)):
+            self.favMovie= Button(self, text= self.favTitles[i], \
+            width= max([len(i) for i in self.favTitles]), bg= "black", \
+            fg= "white", command=lambda i=i:self.movieScreen(self.favTitles[i]))
+            self.canvas.create_window(self.width/2, self.height/20*9+i*20, \
+            window=self.favMovie)
+        
+        
+    def addFavorite(self, title):
+        # what happens when you favorite a movie
+        self.canvas.delete("unfav")
+        self.favorite= PhotoImage(file= "./images/favorite.png")
+        # when favorite button pressed again, movie unfavorited
+        self.favButton= Button(self, text="Unfavorite  ", \
+        command= lambda:self.removeFavorite(title))
+        self.favButton.config(image= self.favorite, compound= LEFT)
+        self.canvas.create_window(self.width/3, self.height/4+70, \
+        window= self.favButton, anchor= NW, tags= "fav")
+        # only add to favorites list if not already in it
+        if title not in self.favoriteLst:
+            self.favoriteLst.append(title)
+    
+    def removeFavorite(self, title):
+        # when you unfavorite a movie
+        self.canvas.delete('fav')
+        self.unfavorite= PhotoImage(file= "./images/unfavorite.png")
+        self.favButton= Button(self, text="Favorite  ", \
+        command= lambda: self.addFavorite(title))
+        self.favButton.config(image= self.unfavorite, compound= LEFT)
+        self.canvas.create_window(self.width/3, self.height/4+70, \
+        window= self.favButton, anchor= NW, tags= "unfav")
+        # only legal to remove when len of list >0 and movie in list
+        if len(self.favoriteLst) > 0 and title in self.favoriteLst:
+            self.favoriteLst.remove(title)
+    
+    def reformatPlot(self, text):
+        # reformat the plot to make it look nice
+        sText= str(text).split()
+        plotlst= []
+        for i in sText:
+            if len(plotlst)%12==0:
+                plotlst.append("\n")
+            plotlst.append(i)
+        return " ".join(plotlst)
+        
+        
 
-
+recUI = UI()
+recUI.mainloop()
