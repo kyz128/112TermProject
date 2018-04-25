@@ -136,7 +136,7 @@ def getSpellingSuggestion(word):
     # get top 3 suggestions
     for j, val in sim[0:3]:
         if sim[0][1] < 0.2:
-            return 'No movie exist with that name. Check your spelling.'
+            return 'No movie exist with that name. Check your spelling.', []
         cautionText= 'Movie not found. Did you mean this:'
         suggestionLst.append(allFeatures['original_title'][j])
     return cautionText, suggestionLst
