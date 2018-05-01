@@ -9,8 +9,15 @@
 
 from tkinter import *
 from recommend import *
+from PIL import ImageTk, Image  
 
 class UI(Tk):
+    
+    @staticmethod
+    def readFavorites():
+        favorites=[line.rstrip() for line in open("favorites.txt")]
+        return favorites
+    
     def __init__(self):
         Tk.__init__(self)
         self.width= 900
@@ -19,46 +26,87 @@ class UI(Tk):
         self.height)
         self.canvas.pack()
         # initalize favorites list
-        self.favoriteLst= []
+        self.favoriteLst= UI.readFavorites()
         # keeps track of current recommendation method and screen
         self.currentScreen= None
         self.currentListing= None
         self.searchImage= PhotoImage(file="./images/searchScreen.png")
         self.home= PhotoImage(file="./images/home.png")
-        self.welcomeScreen()
+        self.coverScreen()
+        self.protocol("WM_DELETE_WINDOW", self.writeFavorites) 
+    
+    def writeFavorites(self):
+        self.destroy()
+        f= open("favorites.txt", "w+")
+        if len(self.favoriteLst)==0:
+            f.write("")
+        else:
+            for i in self.favoriteLst:
+                f.write(str(i)+"\n")
+        f.close()
+    
+    def coverScreen(self):
+        self.canvas.delete('all')
+        self.start = Image.open('./images/cover.png')
+        self.startImg = ImageTk.PhotoImage(self.start)
+        self.canvas.create_image(self.width/2, self.height/2, image=self.startImg)
+        self.canvas.create_text(self.width/2, self.height/3, text="MovieScout", fill="white", font=("ms serif", 48, "bold"))
+        self.startButton = Button(self, text="Start", command=self.langScreen, width= 10)
+        self.startButton.config(font=('ms serif', 12))
+        self.canvas.create_window(self.width/2, self.height/5*4, window=self.startButton)
+    
+    def langScreen(self):
+        self.canvas.delete('all')
+        self.lang = Image.open('./images/lang.png')
+        self.langImg = ImageTk.PhotoImage(self.lang)
+        self.canvas.create_image(self.width/2, self.height/2, image=self.langImg)
+        self.canvas.create_text(self.width/2, self.height/3, text="Select the movie language", fill="white", font=("ms serif", 25, "bold"))
+        self.langLst= ["English(en)", "Spanish(es)", "French(fr)", "German(de)", "Italian(it)","Japanese(ja)", "Russian(ru)"]
+        self.langVar = StringVar(self)
+        self.langVar.set("English(en)") 
+        self.langOption = OptionMenu(self, self.langVar, *self.langLst)
+        self.langOption.config(width=30, font=('ms serif', 12))
+        self.canvas.create_window(self.width/2, self.height/4*3, window=self.langOption)
+        self.langButton = Button(self, text="Next", command=self.welcomeScreen, width= 10)
+        self.langButton.config(font=('ms serif', 12))
+        self.backButton= Button(self, text="Back", width=10, bg= "white", fg="black", command=self.coverScreen)
+        self.canvas.create_window(self.width/12, self.height/12, window= self.backButton )
+        self.canvas.create_window(self.width/4*3, self.height/4*3, window=self.langButton)
+
     
     def welcomeScreen(self):
-        # first screen that displays
         self.canvas.delete('all')
+        self.val= self.langVar.get()
+        self.langSelected=self.val[-3:-1]
         self.startImage= PhotoImage(file= "./images/startImage.png")
-        self.canvas.create_image(self.width/2, self.height/2, \
-         image= self.startImage)
-        self.canvas.create_text(self.width/3, self.height/3, \
-        text= "MovieScout", font= "Helvetica 48 bold", fill= "black")
-        self.var = StringVar(self)
-        self.var.set('Getting Started')
-        # create drop-down menu 
-        self.options = OptionMenu(self, self.var, "Title Recommendations", \
-        command=self.titleScreen)
-        self.options.config(bg= "black", fg= "white",font= "Helvetica 15")
-        self.options['menu'].config(bg= "black", fg= "white", \
-        font= "Helvetica 12")
-        self.options['menu'].add_command(label='Genre Recommendations', \
-        command=self.genreScreen)
-        self.options['menu'].add_command(label='Mood Recommendations', \
-        command= "")
-        self.canvas.create_window(self.width/3, self.height/4*3, \
-        window=self.options)
-
+        self.canvas.create_image(self.width/2,self.height/2, \
+            image= self.startImage)
+        self.gButton= Button(self, text="Genre Recommendations", width= len("Genre Recommendations"), command=self.genreScreen )
+        self.gButton.config(font=("ms serif", 12))
+        self.canvas.create_window(self.width/3, self.height/3, window=self.gButton)
+        self.fButton= Button(self, text="Favorite Recommendations", width= len("Favorite Recommendations"), command=self.favoriteMovies )
+        self.fButton.config(font=("ms serif", 12))
+        self.canvas.create_window(self.width/3, self.height/2, window=self.fButton)
+        self.tButton= Button(self, text="Title Recommendations", width= len("Title Recommendations"), command=self.titleScreen)
+        self.tButton.config(font=("ms serif", 12))
+        self.canvas.create_window(self.width/3, self.height/3*2, \
+        window=self.tButton)
+        self.backButton= Button(self, text="Back", width=10, bg= "white", fg="black", command=self.langScreen)
+        self.canvas.create_window(self.width/12, self.height/12, window= self.backButton )
+        self.homeButton= Button(self, command= self.coverScreen)
+        self.homeButton.config(image= self.home, compound= CENTER)
+        self.canvas.create_window(self.width/12, self.height/12*11, \
+        window=self.homeButton)
+    
     def genreScreen(self):
         self.canvas.delete('all')
         self.canvas.create_image(self.width/2, self.height/2, \
          image= self.searchImage)  
         self.canvas.create_text(self.width/2+20, self.height/6, \
-        text= "Genres", fill= "black", font= "Helvetica 18 bold")
+        text= "Genres", fill= "black", font= ("ms serif", 18, "bold"))
         # home button returns to starting page
         self.homeButton= Button(self, bg= "black", fg= "white", \
-        command= self.welcomeScreen)
+        command= self.coverScreen)
         self.homeButton.config(image= self.home, compound= CENTER)
         self.canvas.create_window(self.width/12, self.height/12*11, \
         window=self.homeButton)
@@ -92,9 +140,9 @@ class UI(Tk):
         self.canvas.create_image(self.width/2, self.height/2, \
          image= self.searchImage)  
         self.canvas.create_text(self.width/2+20, self.height/6, \
-        text= genre, fill= "black", font= "Helvetica 18 bold")
+        text= genre, fill= "black", font= ("ms serif", 18, "bold"))
         self.homeButton= Button(self, bg= "black", fg= "white", \
-        command= self.welcomeScreen)
+        command= self.coverScreen)
         self.homeButton.config(image= self.home, compound= CENTER)
         self.canvas.create_window(self.width/12, self.height/12*11, \
         window=self.homeButton)
@@ -111,7 +159,7 @@ class UI(Tk):
         # save current genre selected to return to that genre listing page 
         # if needed
         self.genreSelected= genre
-        self.topGenreLst= getGenreRec(genre)
+        self.topGenreLst= getGenreRec(genre, self.langSelected)
         for i in range(len(self.topGenreLst)):
             self.genreButton= Button(self, text= self.topGenreLst[i], \
             width= max([len(i) for i in self.topGenreLst]), bg= "black", \
@@ -128,10 +176,10 @@ class UI(Tk):
         self.canvas.create_image(self.width/2, self.height/2, \
          image= self.searchImage)  
         # enter movie title in text entry box
-        self.inputBox = Entry(self.canvas, font= "Helvetica 18")
+        self.inputBox = Entry(self.canvas, font= ("ms serif", 18, "bold"))
         self.canvas.create_text(self.width/2, self.height/5, \
         text= "Enter a movie title here", fill= "black", \
-        font= "Helvetica 18 bold")
+        font= ("ms serif", 18, "bold"))
         self.canvas.create_window(self.width/2, self.height/3, \
         window=self.inputBox)
         self.recButton= Button(self, text= "Get Recs", width= 10, \
@@ -139,7 +187,7 @@ class UI(Tk):
         self.canvas.create_window(self.width/4*3, self.height/3, \
         window=self.recButton)
         self.homeButton= Button(self, bg= "black", fg= "white", \
-        command= self.welcomeScreen)
+        command= self.coverScreen)
         self.homeButton.config(image= self.home, compound= CENTER)
         self.canvas.create_window(self.width/12, self.height/12*11, \
         window=self.homeButton)    
@@ -152,11 +200,11 @@ class UI(Tk):
         self.inputText= self.inputBox.get()
         # if title not misspelled, pass inputText into ML function 
         if title=="":
-            self.msg, self.titleLst= getTitleRecs(str(self.inputText))
+            self.msg, self.titleLst= getTitleRecs(str(self.inputText), self.langSelected)
         else: 
-            self.msg, self.titleLst= getTitleRecs(str(title))
+            self.msg, self.titleLst= getTitleRecs(str(title), self.langSelected)
         self.canvas.create_text(self.width/2, self.height/20*9, \
-        text=self.msg, fill= "blue", font= "Helvetica 12 bold", tags= "msg")
+        text=self.msg, fill= "blue", font= ("ms serif", 12, "bold"), tags= "msg")
         for i in range(len(self.titleLst)):
              # if misspelled title input call title recs again but pass 
             # in suggested title
@@ -198,10 +246,10 @@ class UI(Tk):
     
     def movieScreen(self, title):
         # displays movie info (e.g. plot, year, name, etc.) given title
-        self.mGenre, self.mDate, self.mRate, self.mPlot= getMovieData(title)
+        self.mGenre, self.mDate, self.mRate, self.mPlot= getMovieData(title, self.langSelected)
         self.canvas.delete('all')
         self.homeButton= Button(self, bg= "black", fg= "white", \
-        command= self.welcomeScreen)
+        command= self.coverScreen)
         self.homeButton.config(image= self.home, compound= CENTER)
         self.canvas.create_window(self.width/12, self.height/12*11, \
         window=self.homeButton)
@@ -219,20 +267,20 @@ class UI(Tk):
         self.canvas.create_image(self.width/2, self.height/2, \
         image= self.movieBg)
         self.canvas.create_text(self.width/3, self.height/6, \
-        text= title, font= "Helvetica 18 bold", anchor= NW)
+        text= title, font= ("ms serif", 18, "bold"), anchor= NW)
         self.canvas.create_text(self.width/3, self.height/4, \
-        text= "Genres: %s" % str(self.mGenre), anchor= NW, font="Helvetica 12")
+        text= "Genres: %s" % str(self.mGenre), anchor= NW, font=("ms serif", 12))
         self.canvas.create_text(self.width/3, self.height/4+20,\
         text= "Released Date: %s" % str(self.mDate), anchor= NW, \
-        font= "Helvetica 12")
+        font= ("ms serif", 12))
         # round rating to 2 decimal places
         self.canvas.create_text(self.width/3, self.height/4+40, \
         text= "Rating: %0.2f" % float(self.mRate), anchor= NW, \
-        font= "Helvetica 12")
+        font= ("ms serif", 12))
         # placeholder image for movie poster
         self.photo= PhotoImage(file= './images/photo.png')
         self.canvas.create_image(self.width/5,self.height/3, image= self.photo)
-        self.text= self.reformatPlot(self.mPlot)
+        self.text= UI.reformatPlot(self.mPlot)
         self.canvas.create_text(self.width/3, self.height/20*9, \
         text= self.text, anchor= NW)
         # control display of the favorite button when revisitng a movie
@@ -247,9 +295,9 @@ class UI(Tk):
         self.canvas.create_image(self.width/2, self.height/2, \
          image= self.searchImage)
         self.canvas.create_text(self.width/2+20, self.height/6, \
-        text= "Favorites", fill= "black", font= "Helvetica 18 bold")
+        text= "Favorites", fill= "black", font= ("ms serif", 18, "bold"))
         self.homeButton= Button(self, bg= "black", fg= "white", \
-        command= self.welcomeScreen)
+        command= self.coverScreen)
         self.homeButton.config(image= self.home, compound= CENTER)
         self.canvas.create_window(self.width/12, self.height/12*11, \
         window=self.homeButton)
@@ -262,7 +310,7 @@ class UI(Tk):
         if len(self.favoriteLst)==0:
             self.canvas.create_text(self.width/2, self.height/3, \
             text="Nothing in Favorites!", fill= "blue", \
-            font="Helvetica 14 bold")
+            font=("ms serif", 14, "bold"))
         else: 
             for i in range(len(self.favoriteLst)):
                 self.favMovieButton= Button(self, text= self.favoriteLst[i], \
@@ -280,7 +328,7 @@ class UI(Tk):
         self.canvas.create_image(self.width/2, self.height/2, \
          image= self.searchImage)
         self.homeButton= Button(self, bg= "black", fg= "white", \
-        command= self.welcomeScreen)
+        command= self.coverScreen)
         self.homeButton.config(image= self.home, compound= CENTER)
         self.canvas.create_window(self.width/12, self.height/12*11, \
         window=self.homeButton)
@@ -290,17 +338,16 @@ class UI(Tk):
         window= self.backButton )
         self.canvas.create_text(self.width/2, self.height/5, \
         text= "Favorites Recommendation", fill= "black", \
-        font= "Helvetica 18 bold")
-        self.favMsg, self.favTitles= getFavorites(self.favoriteLst)
+        font= ("ms serif", 18, "bold"))
+        self.favMsg, self.favTitles= getFavorites(self.favoriteLst, self.langSelected)
         self.canvas.create_text(self.width/2, self.height/3, \
-        text= self.favMsg, fill= "blue", font= "Helvetica 12 bold")
+        text= self.favMsg, fill= "blue", font= ("ms serif", 12, "bold"))
         for i in range(len(self.favTitles)):
             self.favMovie= Button(self, text= self.favTitles[i], \
             width= max([len(i) for i in self.favTitles]), bg= "black", \
             fg= "white", command=lambda i=i:self.movieScreen(self.favTitles[i]))
             self.canvas.create_window(self.width/2, self.height/20*9+i*20, \
             window=self.favMovie)
-        
         
     def addFavorite(self, title):
         # what happens when you favorite a movie
@@ -329,7 +376,8 @@ class UI(Tk):
         if len(self.favoriteLst) > 0 and title in self.favoriteLst:
             self.favoriteLst.remove(title)
     
-    def reformatPlot(self, text):
+    @staticmethod
+    def reformatPlot(text):
         # reformat the plot to make it look nice
         sText= str(text).split()
         plotlst= []
@@ -338,8 +386,7 @@ class UI(Tk):
                 plotlst.append("\n")
             plotlst.append(i)
         return " ".join(plotlst)
-        
-        
+    
 
 recUI = UI()
 recUI.mainloop()
