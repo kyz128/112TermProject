@@ -6,6 +6,7 @@
 #https://www.123rf.com/photo_3985403_tv-channel-movie-guide-on-abstract-background.html
 #http://www.pixempire.com/icon/square-with-star-icon.html
 #https://br.freepik.com/icones-gratis/pagina-web-pagina-inicial_768343.htm
+#http://asweetspirit.blogspot.com/2013/05/great-gatsby-decoration.html
 
 from tkinter import *
 from recommend import *
