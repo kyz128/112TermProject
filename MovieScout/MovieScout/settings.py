@@ -65,8 +65,7 @@ ROBOTSTXT_OBEY = False
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    'MovieScout.MovieScout.pipelines.MoviescoutPipeline': 300,
-    'scrapy.pipelines.images.ImagesPipeline':1,
+    'MovieScout.MovieScout.pipelines.MoviescoutPipeline': 1,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
