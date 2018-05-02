@@ -1,38 +1,39 @@
-# #for testing/practicing purposes 
-# #source: https://machinelearningmastery.com/prepare-text-data-machine-learning-scikit-learn/
-# # from sklearn.feature_extraction.text import CountVectorizer
-# # from sklearn.metrics.pairwise import cosine_similarity
+# # #for testing/practicing purposes 
+# # #source: https://machinelearningmastery.com/prepare-text-data-machine-learning-scikit-learn/
+# # # from sklearn.feature_extraction.text import CountVectorizer
+# # # from sklearn.metrics.pairwise import cosine_similarity
+# # # 
+# # # from sklearn.feature_extraction.text import CountVectorizer
+# # # # list of text documents
+# # # text = ["The quick brown fox jumped over the lazy dog."]
+# # # # create the transform
+# # # vectorizer = CountVectorizer()
+# # # # tokenize and build vocab
+# # # vectorizer.fit(text)
+# # # # summarize
+# # # print(vectorizer.vocabulary_)
+# # # # encode document
+# # # vector = vectorizer.transform(text)
+# # # # summarize encoded vector
+# # # print(vector.shape)
+# # # print(type(vector))
+# # # print(vector.toarray())
 # # 
-# # from sklearn.feature_extraction.text import CountVectorizer
-# # # list of text documents
-# # text = ["The quick brown fox jumped over the lazy dog."]
-# # # create the transform
-# # vectorizer = CountVectorizer()
-# # # tokenize and build vocab
-# # vectorizer.fit(text)
-# # # summarize
-# # print(vectorizer.vocabulary_)
-# # # encode document
-# # vector = vectorizer.transform(text)
-# # # summarize encoded vector
-# # print(vector.shape)
-# # print(type(vector))
-# # print(vector.toarray())
+# # # User interface
+# # 
+# # #images from 
+# # #https://www.listchallenges.com/movies-that-you-cant-live-life-without-seeing
+# # #https://www.pinterest.com/pin/414683078161007928/
+# # #https://www.123rf.com/photo_3985403_tv-channel-movie-guide-on-abstract-background.html
+# # #http://www.pixempire.com/icon/square-with-star-icon.html
+# # #https://br.freepik.com/icones-gratis/pagina-web-pagina-inicial_768343.htm
+# # https://www.walmart.com/ip/UTZ-Halloween-Pretzels-Treats-Bags-70ct-35oz/116882017
 # 
-# # User interface
 # 
-# #images from 
-# #https://www.listchallenges.com/movies-that-you-cant-live-life-without-seeing
-# #https://www.pinterest.com/pin/414683078161007928/
-# #https://www.123rf.com/photo_3985403_tv-channel-movie-guide-on-abstract-background.html
-# #http://www.pixempire.com/icon/square-with-star-icon.html
-# #https://br.freepik.com/icones-gratis/pagina-web-pagina-inicial_768343.htm
-# https://www.walmart.com/ip/UTZ-Halloween-Pretzels-Treats-Bags-70ct-35oz/116882017
-
-
-# l= ["a", "b", "c"]
-# print("%20".join(l))
+# # l= ["a", "b", "c"]
+# # print("%20".join(l))
 from tkinter import *
+import time
 from recommend import *
 from PIL import ImageTk, Image  
 import MovieScout.MovieScout.run 
@@ -286,6 +287,7 @@ class UI(Tk):
         self.canvas.create_window(self.width/12, self.height/12*11, \
         window=self.homeButton)
         #see favorites list
+        MovieScout.MovieScout.run.runSpider()
         self.favListButton= Button(self, text= "See Favorites", \
         width=len("See Favorites"), bg= "black", fg= "white", \
         command= self.showFavList)
@@ -309,13 +311,13 @@ class UI(Tk):
         self.canvas.create_text(self.width/3, self.height/4+40, \
         text= "Rating: %0.2f" % float(self.mRate), anchor= NW, \
         font= ("ms serif", 12))
-        MovieScout.MovieScout.run.runSpider()
         # placeholder image for movie poster
         if ":" in self.url:
-            self.imgTitle= self.url.replace(":", "")
-        else: self.imgTitle= self.url
+            self.url= str(self.url).replace(":", "")
+        else: self.imgTitle= str(self.url)
+        time.sleep(1)
         try:
-            self.img = Image.open('C:/Users/kimbe/Documents/15112/Term Project/images/full/%s.jpg' % self.imgTitle)
+            self.img = Image.open('C:/Users/kimbe/Documents/15112/TermProject/images/full/%s.jpg' % self.imgTitle)
         except:
             self.img = Image.open('./images/placeholder.jpeg')
         self.movieimg = ImageTk.PhotoImage(self.img)
@@ -430,54 +432,69 @@ class UI(Tk):
 # # 
 recUI = UI()
 recUI.mainloop()
-
-
-# lst= ["a", "b", "c", "d", "e"]
-# def writeFile():
-#     master.destroy()
-#     f= open("favorites.txt", "w+")
-#     for i in lst:
-#         f.write(i+"\n")
-#     f.close()
+# 
+# 
+# # lst= ["a", "b", "c", "d", "e"]
+# # def writeFile():
+# #     master.destroy()
+# #     f= open("favorites.txt", "w+")
+# #     for i in lst:
+# #         f.write(i+"\n")
+# #     f.close()
+# # from tkinter import *
+# # from PIL import ImageTk, Image  
+# # master = Tk()
+# # canvas = Canvas(master, width=900, height = 500)
+# # canvas.pack()
+# # canvas.create_rectangle(0,0, 900, 500, fill="black")
+# # img = Image.open('/images/full/City Lights.jpg')
+# # img = Image.open('./images/full/City Lights.jpg')
+# # movieimg = ImageTk.PhotoImage(img)
+# # canvas.create_image(900/5,500/5*2, image= movieimg)
+# 
+# 
+# 
+# 
+# # f= open("favorites.txt", "w+")
+# # f.write("")
+# # f.close()
+# 
+# # alist=[line.rstrip() for line in open("favorites.txt")]
+# # print(alist)
+# 
+# # def readFavorites():
+# #     favorites=[line.rstrip() for line in open("favorites.txt")]
+# #     return favorites
+# # 
+# # def writeFavorites():
+# #     self.destroy()
+# #     f= open("favorites.txt", "w+")
+# #     if len(self.favoriteLst)==0:
+# #         f.write("")
+# #     else:
+# #         for i in self.favoriteLst:
+# #             f.write(i+"\n")
+# #     f.close()
+#     
+# # f= open("favorites.txt", "w")
+# # for i in range(10):
+# #     f.write("This is movie number %d\n" % (i+5))
+# # f.close()
+# # mainloop()
+# 
+# 
 # from tkinter import *
+# # import MovieScout.MovieScout.run
 # from PIL import ImageTk, Image  
 # master = Tk()
 # canvas = Canvas(master, width=900, height = 500)
 # canvas.pack()
+# # process= CrawlerProcess(get_project_settings())
 # canvas.create_rectangle(0,0, 900, 500, fill="black")
-# img = Image.open('/images/full/City Lights.jpg')
-# img = Image.open('./images/full/City Lights.jpg')
+# # button= Button(master, text="click me", command=MovieScout.MovieScout.run.runSpider)
+# imgTitle= 'City+Lights'
+# img = Image.open('C:/Users/kimbe/Documents/15112/TermProject/images/full/%s.jpg' % imgTitle)
 # movieimg = ImageTk.PhotoImage(img)
 # canvas.create_image(900/5,500/5*2, image= movieimg)
-
-
-
-
-# f= open("favorites.txt", "w+")
-# f.write("")
-# f.close()
-
-# alist=[line.rstrip() for line in open("favorites.txt")]
-# print(alist)
-
-# def readFavorites():
-#     favorites=[line.rstrip() for line in open("favorites.txt")]
-#     return favorites
-# 
-# def writeFavorites():
-#     self.destroy()
-#     f= open("favorites.txt", "w+")
-#     if len(self.favoriteLst)==0:
-#         f.write("")
-#     else:
-#         for i in self.favoriteLst:
-#             f.write(i+"\n")
-#     f.close()
-    
-# f= open("favorites.txt", "w")
-# for i in range(10):
-#     f.write("This is movie number %d\n" % (i+5))
-# f.close()
+# # canvas.create_window(450, 250, window= button)
 # mainloop()
-
-

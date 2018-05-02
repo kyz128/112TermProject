@@ -88,4 +88,4 @@ ITEM_PIPELINES = {
 #HTTPCACHE_DIR = 'httpcache'
 #HTTPCACHE_IGNORE_HTTP_CODES = []
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
-IMAGES_STORE="C:/Users/kimbe/Documents/15112/Term Project/images"
+IMAGES_STORE="C:/Users/kimbe/Documents/15112/TermProject/images"
