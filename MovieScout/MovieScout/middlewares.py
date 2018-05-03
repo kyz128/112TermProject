@@ -4,7 +4,9 @@
 #
 # See documentation in:
 # https://doc.scrapy.org/en/latest/topics/spider-middleware.html
-
+###########################################################################
+# I didn't write any of this; default file from creating a scrapy project
+###########################################################################
 from scrapy import signals
 
 

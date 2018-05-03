@@ -1,5 +1,10 @@
 # perform the machine learning on data
 # import the necessary modules
+# referenced sklearn documentation; see following links 
+#http://scikit-learn.org/stable/modules/generated/sklearn.metrics.pairwise.cosine_similarity.html
+#http://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.CountVectorizer.html
+# pandas syntax: referenced course notes; took online class "Python for Data Science" by University of California San Diego
+
 import pandas as pd
 import numpy as np
 import string

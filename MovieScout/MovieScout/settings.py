@@ -8,7 +8,10 @@
 #     https://doc.scrapy.org/en/latest/topics/settings.html
 #     https://doc.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://doc.scrapy.org/en/latest/topics/spider-middleware.html
-
+###############################################################################
+# Note this file is created by default when you start a scrapy project in cmd
+# I merely changed some of the settings to suit the needs of the project
+###############################################################################
 BOT_NAME = 'MovieScout'
 
 SPIDER_MODULES = ['MovieScout.MovieScout.spiders']
@@ -20,7 +23,7 @@ NEWSPIDER_MODULE = 'MovieScout.MovieScout.spiders'
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False
-
+################################################################################
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 #CONCURRENT_REQUESTS = 32
 
@@ -64,10 +67,14 @@ ROBOTSTXT_OBEY = False
 
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
+###############################################################################
+# enable the item pipelines for image downloads; highest priority
 ITEM_PIPELINES = {
     'MovieScout.MovieScout.pipelines.MoviescoutPipeline': 1,
 }
-
+# Specifies where the images will be stored
+IMAGES_STORE="C:/Users/kimbe/Documents/15112/TermProject/images"
+################################################################################
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://doc.scrapy.org/en/latest/topics/autothrottle.html
 #AUTOTHROTTLE_ENABLED = True
@@ -88,4 +95,3 @@ ITEM_PIPELINES = {
 #HTTPCACHE_DIR = 'httpcache'
 #HTTPCACHE_IGNORE_HTTP_CODES = []
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
-IMAGES_STORE="C:/Users/kimbe/Documents/15112/TermProject/images"
