@@ -1,4 +1,5 @@
 #for testing/practicing purposes 
+# Nothing is mine
 #source: https://machinelearningmastery.com/prepare-text-data-machine-learning-scikit-learn/
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
