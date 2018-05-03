@@ -1,4 +1,4 @@
-# get title-based recommendations 
+# perform the machine learning on data
 # import the necessary modules
 import pandas as pd
 import numpy as np
@@ -20,6 +20,7 @@ low_memory= False, usecols= fields)
 # Data Cleaning 
 ###############################################################################
 # merge keywords, credits, and metadata for analysis
+# see TP Data Exploration.pdf for more info
 # metadata id column has invalid values; they should be eliminated 
 invalid= []
 metadataLen= len(metadata['id'])
@@ -43,6 +44,7 @@ allFeatures.drop_duplicates(subset= "original_title", keep="first", \
 inplace= True)
 # look at top 3 actors, plot keywords, and genre for recommendation criteria
 measures = ['cast','keywords', 'genres']
+# feature dictionaries enclosed by strings; literal_eval gets rid of them
 for measure in measures:
     allFeatures[measure] = allFeatures[measure].apply(literal_eval)
 
@@ -81,11 +83,13 @@ allFeatures["weighted_rating"]= 5*allFeatures["vote_average"]/10 + \
 def toString(lst):
     return " ".join(lst)
 
+#join the elements to form aggregate search criteria
 def searchString(movie):
     return ' '.join(movie['keywords']) + ' ' + ' '.join(movie['cast']) + ' ' \
     + ' '.join(movie['genres'])
 
 allFeatures['search'] = allFeatures.apply(searchString, axis='columns')
+# to evaluate if movie is part of a certain genre 
 allFeatures["genresStr"]= allFeatures['genres'].apply(toString)
 
 ###############################################################################
@@ -105,34 +109,49 @@ allFeatures['newTitle']= allFeatures['original_title'].apply(normalizeTitle)
 # reset index to account for dropped rows
 allFeatures.reset_index(drop=True, inplace=True)
 
+# select a subset of allFeatures; specifically only rows where 
+# the original_language is what is selected in the ui
 def langData(lang):
-    allFeaturesCopy= allFeatures[allFeatures["original_language"]==lang].copy(deep=True)
+    allFeaturesCopy= \
+    allFeatures[allFeatures["original_language"]==lang].copy(deep=True)
+    # create a new lookup table for the slice
     allFeaturesCopy.reset_index(drop=True, inplace=True)
-    indicesCopy = pd.Series(allFeaturesCopy.index, index=allFeaturesCopy['newTitle'])
+    indicesCopy = \
+    pd.Series(allFeaturesCopy.index, index=allFeaturesCopy['newTitle'])
     return allFeaturesCopy, indicesCopy
     
-# get cosine similarity scores for all movies given a movie title
+# get cosine similarity scores for all movies given a movie title and lang
 def showCos(title, lang):
     data, index= langData(lang)
+    # get movie id
     i= index[title]
+    # find corresponding search string and use it as criteria to evaluate
+    # similarity 
     vocab= (data['search'][i]).split(" ")
     countVector = CountVectorizer(stop_words='english', vocabulary= vocab)
     countData = countVector.transform(data['search'])
+    # compare the how similar a given movie is to all other movies 
     cosScore = cosine_similarity(countData[i], countData)
     return cosScore
 
+# compute cosine similarity for typed in word and all movies in database
 def similarTitle(word, lang):
     data, index= langData(lang)
     countVector = CountVectorizer(stop_words='english')
+    # vocabulary is created from all movie titles 
     c = countVector.fit(data['original_title'])
-    cosScore = cosine_similarity(c.transform([word]), c.transform(data['original_title']))
+    # evaluate word input 
+    cosScore = \
+    cosine_similarity(c.transform([word]), c.transform(data['original_title']))
     return cosScore
 
 def getSpellingSuggestion(word, lang):
     data, index= langData(lang)
     suggestionLst=[]
     simTitle= similarTitle(word, lang)
+    # assign each score their corresponding movie id
     sim= list(enumerate(simTitle[0]))
+    # most similar titles show up first
     sim.sort(key= lambda x: x[1], reverse= True)
     # get top 3 suggestions
     for j, val in sim[0:3]:
@@ -147,16 +166,19 @@ def getTitleRecs(inputTitle, lang):
     titlesLst=[]
     try:
         title= inputTitle
+        # convert title input into all lowercase and no space
         normTitle= normalizeTitle(title)
         scores= showCos(normTitle, lang)
         data, index= langData(lang)
         scoresLst= list(enumerate(scores[0]))
         scoresLst.sort(key= lambda x: x[1], reverse= True)
         successText= 'You might like these movies:'
+        # skip most similar because that is the movie passed in 
         for i, score in scoresLst[1:11]:
             titlesLst.append(data['original_title'][i])
         return successText, titlesLst
     except:
+        # if error, try to give spell suggestions
         try:
             return getSpellingSuggestion(inputTitle, lang)
         except: 
@@ -164,6 +186,7 @@ def getTitleRecs(inputTitle, lang):
 
 
 def showFavCos(titleLst, lang):
+    # ensure no duplicates in vocab
     allVocab=set()
     data, index= langData(lang)
     for i in titleLst:
@@ -171,8 +194,10 @@ def showFavCos(titleLst, lang):
         vocab= (data['search'][inx]).split(" ")
         for j in vocab:
             allVocab.add(j)
+    # turn final vocab list into string; compatible with search string dtype
     s= " ".join(list(allVocab))
     countVector = CountVectorizer(stop_words='english')
+    # use search string as basis for evaluation 
     countData = countVector.fit(data["search"])
     cosScore = cosine_similarity(countVector.transform([s]), countVector.transform(data['search']))
     return cosScore
@@ -180,11 +205,13 @@ def showFavCos(titleLst, lang):
 def getFavorites(favList, lang):
     titlesLst=[]
     newFavList=[]
+    # skip movies already in the favorites list
     skipNum= len(favList)
     if len(favList)==0:
         return "Nothing in favorites", []
     data, index= langData(lang)
     try:
+        # reformat all titles in favorites list and store them in newFavList
         for i in favList:
             j=normalizeTitle(i)
             newFavList.append(j)
@@ -192,6 +219,7 @@ def getFavorites(favList, lang):
         favScores= list(enumerate(scores[0]))
         favScores.sort(key= lambda x: x[1], reverse= True)
         successText= 'You might like these movies:'
+        # get top 10 recommended movies
         for k, score in favScores[skipNum+1:skipNum+11]:
             titlesLst.append(data['original_title'][k])
         return successText, titlesLst
@@ -199,13 +227,14 @@ def getFavorites(favList, lang):
         return "Error!", []
 
 def getGenreRec(genre, lang):
-    # return top 10 movies given genre
+    # return top 10 movies given genre and lang
     genreNorm= normalizeTitle(genre)
-    #filter movies by genre
+    #filter movies by genre and lang
     sliced= \
     allFeatures[(allFeatures["genresStr"].str.contains(genreNorm)) & (allFeatures["original_language"]==lang)].copy(deep=True)
     # sort by rating descending
     sliced.sort_values(by= "weighted_rating", inplace= True, ascending= False)
+    # reset index to account for excluded movies
     sliced.reset_index(drop=True, inplace= True)
     return sliced["original_title"][0:10]
 
